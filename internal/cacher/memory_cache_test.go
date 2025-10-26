@@ -1,6 +1,8 @@
 package cacher
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -31,5 +33,31 @@ func TestMemCacheServicePersistsResponses(t *testing.T) {
 	} else if storedRes.StatusCode != 404 {
 		// Case 3: Should be the same as saved
 		t.Errorf("Expected code %d; Got %d", 404, storedRes.StatusCode)
+	}
+}
+
+func TestMemCacheServicePersistsResponseBody(t *testing.T) {
+	service := NewMemoryCacheService()
+
+	testStr := "JSON CONtent here 22!!"
+
+	req := httptest.NewRequest("GET", "localhost:8080/qqq", nil)
+	res := &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(bytes.NewReader([]byte(testStr))),
+	}
+
+	service.SaveResponse(req, res)
+	storedRes := service.GetResponse(req)
+
+	if storedRes.Body == nil {
+		t.Errorf("Expected response body but got nil")
+	} else {
+		bodyBytes, _ := io.ReadAll(storedRes.Body)
+		bodyStr := string(bodyBytes)
+
+		if bodyStr != testStr {
+			t.Errorf("Expected content %s; Got %s", testStr, bodyStr)
+		}
 	}
 }

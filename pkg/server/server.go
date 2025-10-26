@@ -10,6 +10,7 @@
 package server
 
 import (
+	"io"
 	"net/http"
 	"proxcache/internal/cacher"
 )
@@ -56,9 +57,11 @@ func (s *ProxyServer) writeResponse(w http.ResponseWriter, res *http.Response) {
 		}
 	}
 
-	// TODO write body
-
 	w.WriteHeader(res.StatusCode)
+
+	if res.Body != nil {
+		io.Copy(w, res.Body)
+	}
 }
 
 func NewProxyServer(origin string) *ProxyServer {
