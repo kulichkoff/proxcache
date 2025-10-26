@@ -47,6 +47,8 @@ func TestMemCacheServicePersistsResponseBody(t *testing.T) {
 		Body:       io.NopCloser(bytes.NewReader([]byte(testStr))),
 	}
 
+	// TODO test original response body still accessible after save
+
 	service.SaveResponse(req, res)
 	storedRes := service.GetResponse(req)
 
